@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import kotlin.math.ceil
 
@@ -19,7 +20,7 @@ open class FaceBoxOverlay(context: Context?, attrs: AttributeSet?): View(context
     abstract class FaceBox(private val overlay: FaceBoxOverlay) {
         abstract fun draw(canvas: Canvas?)
 
-        fun getBoxRect(imageBoxWidth: Float, imageRecHeight: Float, faceBoundingBox: Rect): RectF {
+        fun getBoxRect(imageRectWidth: Float, imageRecHeight: Float, faceBoundingBox: Rect): RectF {
             val scaleX = overlay.width.toFloat()
             val scaleY = overlay.height.toFloat()
             val scale = scaleX.coerceAtLeast(scaleY)
@@ -27,7 +28,7 @@ open class FaceBoxOverlay(context: Context?, attrs: AttributeSet?): View(context
             overlay.mScale = scale
 
             val offsetX = (overlay.width.toFloat() - ceil(imageRecHeight * scale)) / 2.0f
-            val offsetY = (overlay.height.toFloat() - ceil(imageBoxWidth * scale)) / 2.0f
+            val offsetY = (overlay.height.toFloat() - ceil(imageRectWidth * scale)) / 2.0f
 
             overlay.mOffsetX = offsetX
             overlay.mOffsetY = offsetY
@@ -45,13 +46,13 @@ open class FaceBoxOverlay(context: Context?, attrs: AttributeSet?): View(context
                 left = centerX + (centerX - left)
                 right = centerX - (right - centerX)
             }
-
-
         }
     }
 
     fun clear() {
-        synchronized(lock) {faceBoxes.clear()}
+        synchronized(lock) {faceBoxes.clear()
+        postInvalidate()
+        }
     }
 
     fun add(faceBox: FaceBox) {
@@ -61,8 +62,8 @@ open class FaceBoxOverlay(context: Context?, attrs: AttributeSet?): View(context
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         synchronized(lock) {
-            for (graphics in faceBoxes) {
-                graphics.draw(canvas)
+            for (graphic in faceBoxes) {
+                graphic.draw(canvas)
             }
         }
     }

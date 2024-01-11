@@ -78,7 +78,6 @@ class FaceDetectionActivity : AppCompatActivity() {
 
         try {
             processCameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis)
-            Log.d(TAG, "bindInputAnalyser")
         } catch (illegalStateException: IllegalStateException) {
             Log.e(TAG, illegalStateException.message?: "IllegalStateException")
         } catch (illegalArgumentException: IllegalArgumentException) {
@@ -98,19 +97,20 @@ class FaceDetectionActivity : AppCompatActivity() {
 
                 faces.forEach{ face ->
                     val box = FaceBox(binding.faceBoxOverlay, face, imageProxy.cropRect)
-
                     binding.faceBoxOverlay.add(box)
-                    Log.d("FACEBOX", face.boundingBox.toString())
-                    Log.d("FACEBOX", face.toString())
                 }
             }
-            .addOnFailureListener { e -> Log.d("Failed", e.toString())}
+            .addOnFailureListener {
+                Log.d(TAG, it.message ?: it.toString())
+            }.addOnCompleteListener {
+                imageProxy.close()
+            }
 
     }
 
 
     companion object {
-        private const val TAG = "FaceActivity"
+        private val TAG = FaceDetectionActivity::class.simpleName
         fun start(context: Context){
             Intent(context, FaceDetectionActivity::class.java).also { context.startActivity(it) }
         }
